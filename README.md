@@ -17,9 +17,9 @@ composer require xylemical/controller
 
 use Xylemical\Controller\Controller;
 
-$requester = ...; // class based on RequesterInterface
-$responder = ...; // class based on ResponderInterface
-$processor = ...; // class based on ProcessorInterface
+$requester = ...; // class based on Xylemical\Controller\RequesterInterface
+$responder = ...; // class based on Xylemical\Controller\ResponderInterface
+$processor = ...; // class based on Xylemical\Controller\ProcessorInterface
 
 $controller = new Controller($requester, $responder, $processor);
 
