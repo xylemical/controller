@@ -29,7 +29,7 @@ class Result implements ResultInterface {
    * @param mixed $contents
    *   The contents.
    */
-  public function __construct(int $status, mixed $contents) {
+  final public function __construct(int $status, mixed $contents) {
     $this->status = $status;
     $this->contents = $contents;
   }
@@ -57,8 +57,8 @@ class Result implements ResultInterface {
    * @return \Xylemical\Controller\Result
    *   The result.
    */
-  public static function complete(mixed $contents): static {
-    return new Result(ResultInterface::STATUS_COMPLETE, $contents);
+  public static function complete(mixed $contents): Result {
+    return new static(ResultInterface::STATUS_COMPLETE, $contents);
   }
 
   /**
@@ -70,8 +70,8 @@ class Result implements ResultInterface {
    * @return \Xylemical\Controller\Result
    *   The result.
    */
-  public static function delayed(mixed $contents): static {
-    return new Result(ResultInterface::STATUS_DELAYED, $contents);
+  public static function delayed(mixed $contents): Result {
+    return new static(ResultInterface::STATUS_DELAYED, $contents);
   }
 
   /**
@@ -83,8 +83,8 @@ class Result implements ResultInterface {
    * @return \Xylemical\Controller\Result
    *   The result.
    */
-  public static function access(string $message): static {
-    return new Result(ResultInterface::STATUS_ACCESS, $message);
+  public static function access(string $message): Result {
+    return new static(ResultInterface::STATUS_ACCESS, $message);
   }
 
   /**
@@ -96,8 +96,8 @@ class Result implements ResultInterface {
    * @return \Xylemical\Controller\Result
    *   The result.
    */
-  public static function unavailable(mixed $contents): static {
-    return new Result(ResultInterface::STATUS_UNAVAILABLE, $contents);
+  public static function unavailable(mixed $contents): Result {
+    return new static(ResultInterface::STATUS_UNAVAILABLE, $contents);
   }
 
   /**
@@ -111,8 +111,8 @@ class Result implements ResultInterface {
    * @return \Xylemical\Controller\Result
    *   The result.
    */
-  public static function exception(int $status, string $message): static {
-    return new Result(
+  public static function exception(int $status, string $message): Result {
+    return new static(
       $status ?: ResultInterface::STATUS_ERROR,
       $message
     );

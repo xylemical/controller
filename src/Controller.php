@@ -62,7 +62,8 @@ class Controller {
   public function handle(RequestInterface $request): ResponseInterface {
     try {
       $body = $this->requester->getBody($request);
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       $result = Result::exception($e->getCode(), $e->getMessage());
     }
 
@@ -72,23 +73,27 @@ class Controller {
           throw new \Exception('No available processor.');
         }
         $result = $this->processor->getResult($request, $body ?? NULL);
-      } catch (AccessException $e) {
+      }
+      catch (AccessException $e) {
         $result = Result::access($e->getMessage());
-      } catch (DelayedException $e) {
+      }
+      catch (DelayedException $e) {
         $result = Result::delayed($e->getMessage());
-      } catch (UnavailableException $e) {
+      }
+      catch (UnavailableException $e) {
         $result = Result::unavailable($e->getMessage());
-      } catch (\Exception $e) {
+      }
+      catch (\Exception $e) {
         $result = Result::exception($e->getCode(), $e->getMessage());
       }
     }
 
     try {
       return $this->responder->getResponse($request, $result);
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       return (new Response())->withStatus(500, $e->getMessage());
     }
   }
-
 
 }

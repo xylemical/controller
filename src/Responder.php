@@ -45,7 +45,6 @@ class Responder implements ResponderInterface {
 
   /**
    * {@inheritdoc}
-   * @param \Xylemical\Controller\ResultInterface $result
    */
   public function applies(RequestInterface $request, ResultInterface $result): bool {
     foreach ($this->responders as $responder) {

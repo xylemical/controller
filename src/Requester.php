@@ -4,7 +4,6 @@ namespace Xylemical\Controller;
 
 use Psr\Http\Message\RequestInterface;
 use Xylemical\Controller\Exception\InvalidBodyException;
-use Xylemical\Controller\Exception\UnavailableException;
 
 /**
  * Provides a generic requester.

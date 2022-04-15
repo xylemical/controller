@@ -2,7 +2,6 @@
 
 namespace Xylemical\Controller;
 
-use \RuntimeException;
 use Psr\Http\Message\StreamInterface;
 
 /**
@@ -53,6 +52,7 @@ class Stream implements StreamInterface {
    * {@inheritdoc}
    */
   public function detach() {
+    return NULL;
   }
 
   /**
@@ -86,14 +86,16 @@ class Stream implements StreamInterface {
   /**
    * {@inheritdoc}
    */
-  public function seek($offset, $whence = SEEK_SET) {
+  public function seek($offset, $whence = SEEK_SET): void {
     $length = strlen($this->contents);
     switch ($whence) {
       case SEEK_SET:
         break;
+
       case SEEK_END:
         $offset += $length;
         break;
+
       case SEEK_CUR:
         $offset += $this->pointer;
         break;
@@ -105,7 +107,7 @@ class Stream implements StreamInterface {
   /**
    * {@inheritdoc}
    */
-  public function rewind() {
+  public function rewind(): void {
     $this->pointer = 0;
   }
 
@@ -120,7 +122,7 @@ class Stream implements StreamInterface {
    * {@inheritdoc}
    */
   public function write($string) {
-    throw new RuntimeException();
+    throw new \RuntimeException();
   }
 
   /**
