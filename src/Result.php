@@ -54,10 +54,10 @@ class Result implements ResultInterface {
    * @param mixed $contents
    *   The contents of the completed result.
    *
-   * @return \Xylemical\Controller\Result
+   * @return static
    *   The result.
    */
-  public static function complete(mixed $contents): Result {
+  public static function complete(mixed $contents): static {
     return new static(ResultInterface::STATUS_COMPLETE, $contents);
   }
 
@@ -67,10 +67,10 @@ class Result implements ResultInterface {
    * @param mixed $contents
    *   The contents of the delayed result.
    *
-   * @return \Xylemical\Controller\Result
+   * @return static
    *   The result.
    */
-  public static function delayed(mixed $contents): Result {
+  public static function delayed(mixed $contents): static {
     return new static(ResultInterface::STATUS_DELAYED, $contents);
   }
 
@@ -80,10 +80,10 @@ class Result implements ResultInterface {
    * @param string $message
    *   The message concerning the access control result.
    *
-   * @return \Xylemical\Controller\Result
+   * @return static
    *   The result.
    */
-  public static function access(string $message): Result {
+  public static function access(string $message): static {
     return new static(ResultInterface::STATUS_ACCESS, $message);
   }
 
@@ -93,10 +93,10 @@ class Result implements ResultInterface {
    * @param mixed $contents
    *   The contents of the unavailable result.
    *
-   * @return \Xylemical\Controller\Result
+   * @return static
    *   The result.
    */
-  public static function unavailable(mixed $contents): Result {
+  public static function unavailable(mixed $contents): static {
     return new static(ResultInterface::STATUS_UNAVAILABLE, $contents);
   }
 
@@ -108,10 +108,10 @@ class Result implements ResultInterface {
    * @param string $message
    *   The message.
    *
-   * @return \Xylemical\Controller\Result
+   * @return static
    *   The result.
    */
-  public static function exception(int $status, string $message): Result {
+  public static function exception(int $status, string $message): static {
     return new static(
       $status ?: ResultInterface::STATUS_ERROR,
       $message
