@@ -89,10 +89,16 @@ class Controller {
     }
 
     try {
-      return $this->responder->getResponse($request, $result);
+      if ($this->responder->applies($request, $result)) {
+        return $this->responder->getResponse($request, $result);
+      }
+      throw new \Exception();
     }
     catch (\Exception $e) {
-      return (new Response())->withStatus(500, $e->getMessage());
+      return (new Response())->withStatus(
+        $e->getCode() ?: 500,
+        $e->getMessage()
+      );
     }
   }
 
