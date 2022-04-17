@@ -19,17 +19,32 @@ class ControllerTest extends TestCase {
   use ProphecyTrait;
 
   /**
+   * Get a mock context factory.
+   *
+   * @return \Xylemical\Controller\ContextFactoryInterface
+   *   The factory.
+   */
+  protected function getContextFactory() {
+    $context = $this->getMockBuilder(ContextInterface::class)->getMock();
+    $factory = $this->prophesize(ContextFactoryInterface::class);
+    $factory->getContext(Argument::any())->willReturn($context);
+    return $factory->reveal();
+  }
+
+  /**
    * Get a generic responder.
    *
    * @param \Psr\Http\Message\RequestInterface $request
    *   The request.
    *
    * @return \Prophecy\Prophecy\ObjectProphecy
+   *   The responder.
    */
   protected function getResponder($request) {
     $responder = $this->prophesize(ResponderInterface::class);
-    $responder->getResponse($request, Argument::any())
-      ->will(function($args) {
+    $responder->applies($request, Argument::any(), Argument::any())->willReturn(TRUE);
+    $responder->getResponse($request, Argument::any(), Argument::any())
+      ->will(function ($args) {
         /** @var \Xylemical\Controller\ResultInterface $result */
         $result = $args[1];
         return new Response($result->getStatus(), $result->getContents());
@@ -48,18 +63,20 @@ class ControllerTest extends TestCase {
     $responder = $this->getResponder($request);
 
     $exception = new InvalidBodyException('Test Message');
-    $requester->applies($request)->willReturn(TRUE);
-    $requester->getBody($request)->willThrow($exception);
+    $requester->applies($request, Argument::any())->willReturn(TRUE);
+    $requester->getBody($request, Argument::any())->willThrow($exception);
 
     $controller = new Controller(
       $requester->reveal(),
       $responder->reveal(),
-      $processor->reveal()
+      $processor->reveal(),
+      $this->getContextFactory()
     );
 
     $response = $controller->handle($request);
     $this->assertEquals(ResultInterface::STATUS_ERROR, $response->getStatusCode());
-    $this->assertEquals($exception->getMessage(), $response->getBody()->getContents());
+    $this->assertEquals($exception->getMessage(), $response->getBody()
+      ->getContents());
   }
 
   /**
@@ -73,20 +90,22 @@ class ControllerTest extends TestCase {
     $processor = $this->prophesize(ProcessorInterface::class);
     $responder = $this->getResponder($request);
 
-    $requester->applies($request)->willReturn(TRUE);
-    $requester->getBody($request)->willReturn($body);
+    $requester->applies($request, Argument::any())->willReturn(TRUE);
+    $requester->getBody($request, Argument::any())->willReturn($body);
 
-    $processor->applies($request, $body)->willReturn(FALSE);
+    $processor->applies($request, $body, Argument::any())->willReturn(FALSE);
 
     $controller = new Controller(
       $requester->reveal(),
       $responder->reveal(),
-      $processor->reveal()
+      $processor->reveal(),
+      $this->getContextFactory()
     );
 
     $response = $controller->handle($request);
     $this->assertEquals(ResultInterface::STATUS_ERROR, $response->getStatusCode());
-    $this->assertEquals('No available processor.', $response->getBody()->getContents());
+    $this->assertEquals('No available processor.', $response->getBody()
+      ->getContents());
   }
 
   /**
@@ -117,22 +136,24 @@ class ControllerTest extends TestCase {
     $processor = $this->prophesize(ProcessorInterface::class);
     $responder = $this->getResponder($request);
 
-    $requester->applies($request)->willReturn(TRUE);
-    $requester->getBody($request)->willReturn($body);
+    $requester->applies($request, Argument::any())->willReturn(TRUE);
+    $requester->getBody($request, Argument::any())->willReturn($body);
 
     $exception = new $exception('Test Message');
-    $processor->applies($request, $body)->willReturn(TRUE);
-    $processor->getResult($request, $body)->willThrow($exception);
+    $processor->applies($request, $body, Argument::any())->willReturn(TRUE);
+    $processor->getResult($request, $body, Argument::any())->willThrow($exception);
 
     $controller = new Controller(
       $requester->reveal(),
       $responder->reveal(),
-      $processor->reveal()
+      $processor->reveal(),
+      $this->getContextFactory()
     );
 
     $response = $controller->handle($request);
     $this->assertEquals($status, $response->getStatusCode());
-    $this->assertEquals($exception->getMessage(), $response->getBody()->getContents());
+    $this->assertEquals($exception->getMessage(), $response->getBody()
+      ->getContents());
   }
 
   /**
@@ -146,16 +167,18 @@ class ControllerTest extends TestCase {
     $processor = $this->prophesize(ProcessorInterface::class);
     $responder = $this->getResponder($request);
 
-    $requester->applies($request)->willReturn(TRUE);
-    $requester->getBody($request)->willReturn($body);
+    $requester->applies($request, Argument::any())->willReturn(TRUE);
+    $requester->getBody($request, Argument::any())->willReturn($body);
 
-    $processor->applies($request, $body)->willReturn(TRUE);
-    $processor->getResult($request, $body)->willReturn(Result::complete('Test Message'));
+    $processor->applies($request, $body, Argument::any())->willReturn(TRUE);
+    $processor->getResult($request, $body, Argument::any())
+      ->willReturn(Result::complete('Test Message'));
 
     $controller = new Controller(
       $requester->reveal(),
       $responder->reveal(),
-      $processor->reveal()
+      $processor->reveal(),
+      $this->getContextFactory()
     );
 
     $response = $controller->handle($request);
@@ -170,27 +193,61 @@ class ControllerTest extends TestCase {
     $request = $this->getMockBuilder(RequestInterface::class)->getMock();
     $body = ['body'];
 
-    $exception = new \Exception('Exception Message');
+    $exception = new \Exception('Exception Message', 214);
     $requester = $this->prophesize(RequesterInterface::class);
     $processor = $this->prophesize(ProcessorInterface::class);
     $responder = $this->prophesize(ResponderInterface::class);
-    $responder->getResponse($request, Argument::any())->willThrow($exception);
+    $responder->applies($request, Argument::any(), Argument::any())->willReturn(TRUE);
+    $responder->getResponse($request, Argument::any(), Argument::any())->willThrow($exception);
 
-    $requester->applies($request)->willReturn(TRUE);
-    $requester->getBody($request)->willReturn($body);
+    $requester->applies($request, Argument::any())->willReturn(TRUE);
+    $requester->getBody($request, Argument::any())->willReturn($body);
 
-    $processor->applies($request, $body)->willReturn(TRUE);
-    $processor->getResult($request, $body)->willReturn(Result::complete('Test Message'));
+    $processor->applies($request, $body, Argument::any())->willReturn(TRUE);
+    $processor->getResult($request, $body, Argument::any())
+      ->willReturn(Result::complete('Test Message'));
 
     $controller = new Controller(
       $requester->reveal(),
       $responder->reveal(),
-      $processor->reveal()
+      $processor->reveal(),
+      $this->getContextFactory()
+    );
+
+    $response = $controller->handle($request);
+    $this->assertEquals(214, $response->getStatusCode());
+    $this->assertEquals($exception->getMessage(), $response->getReasonPhrase());
+  }
+
+  /**
+   * Test response exception.
+   */
+  public function testResponderFailure() {
+    $request = $this->getMockBuilder(RequestInterface::class)->getMock();
+    $body = ['body'];
+
+    $requester = $this->prophesize(RequesterInterface::class);
+    $processor = $this->prophesize(ProcessorInterface::class);
+    $responder = $this->prophesize(ResponderInterface::class);
+    $responder->applies($request, Argument::any(), Argument::any())->willReturn(FALSE);
+
+    $requester->applies($request, Argument::any())->willReturn(TRUE);
+    $requester->getBody($request, Argument::any())->willReturn($body);
+
+    $processor->applies($request, $body, Argument::any())->willReturn(TRUE);
+    $processor->getResult($request, $body, Argument::any())
+      ->willReturn(Result::complete('Test Message'));
+
+    $controller = new Controller(
+      $requester->reveal(),
+      $responder->reveal(),
+      $processor->reveal(),
+      $this->getContextFactory()
     );
 
     $response = $controller->handle($request);
     $this->assertEquals(500, $response->getStatusCode());
-    $this->assertEquals($exception->getMessage(), $response->getReasonPhrase());
+    $this->assertEquals('The responder is unable to respond.', $response->getReasonPhrase());
   }
 
 }

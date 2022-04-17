@@ -35,6 +35,13 @@ class Controller {
   protected ResponderInterface $responder;
 
   /**
+   * The context factory.
+   *
+   * @var \Xylemical\Controller\ContextFactoryInterface
+   */
+  protected ContextFactoryInterface $factory;
+
+  /**
    * Controller constructor.
    *
    * @param \Xylemical\Controller\RequesterInterface $requester
@@ -43,11 +50,14 @@ class Controller {
    *   The responder.
    * @param \Xylemical\Controller\ProcessorInterface $processor
    *   The processor.
+   * @param \Xylemical\Controller\ContextFactoryInterface $factory
+   *   The context factory.
    */
-  public function __construct(RequesterInterface $requester, ResponderInterface $responder, ProcessorInterface $processor) {
+  public function __construct(RequesterInterface $requester, ResponderInterface $responder, ProcessorInterface $processor, ContextFactoryInterface $factory) {
     $this->requester = $requester;
     $this->responder = $responder;
     $this->processor = $processor;
+    $this->factory = $factory;
   }
 
   /**
@@ -61,18 +71,20 @@ class Controller {
    */
   public function handle(RequestInterface $request): ResponseInterface {
     try {
-      $body = $this->requester->getBody($request);
+      $context = $this->factory->getContext($request);
+      $body = $this->requester->getBody($request, $context);
     }
-    catch (\Exception $e) {
+    catch (\Throwable $e) {
       $result = Result::exception($e->getCode(), $e->getMessage());
+      $context = new Context();
     }
 
     if (!isset($result)) {
       try {
-        if (!$this->processor->applies($request, $body ?? NULL)) {
+        if (!$this->processor->applies($request, $body ?? NULL, $context)) {
           throw new \Exception('No available processor.');
         }
-        $result = $this->processor->getResult($request, $body ?? NULL);
+        $result = $this->processor->getResult($request, $body ?? NULL, $context);
       }
       catch (AccessException $e) {
         $result = Result::access($e->getMessage());
@@ -83,18 +95,18 @@ class Controller {
       catch (UnavailableException $e) {
         $result = Result::unavailable($e->getMessage());
       }
-      catch (\Exception $e) {
+      catch (\Throwable $e) {
         $result = Result::exception($e->getCode(), $e->getMessage());
       }
     }
 
     try {
-      if ($this->responder->applies($request, $result)) {
-        return $this->responder->getResponse($request, $result);
+      if ($this->responder->applies($request, $result, $context)) {
+        return $this->responder->getResponse($request, $result, $context);
       }
-      throw new \Exception();
+      throw new \Exception('The responder is unable to respond.');
     }
-    catch (\Exception $e) {
+    catch (\Throwable $e) {
       return (new Response())->withStatus(
         $e->getCode() ?: 500,
         $e->getMessage()

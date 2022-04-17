@@ -16,11 +16,15 @@ interface ProcessorInterface {
    *   The result.
    * @param mixed $contents
    *   The processed body results.
+   * @param \Xylemical\Controller\ContextInterface $context
+   *   The context.
    *
    * @return bool
    *   The result.
+   *
+   * @throws \Throwable
    */
-  public function applies(RequestInterface $request, mixed $contents): bool;
+  public function applies(RequestInterface $request, mixed $contents, ContextInterface $context): bool;
 
   /**
    * Process the request into a result.
@@ -29,6 +33,8 @@ interface ProcessorInterface {
    *   The request.
    * @param mixed $contents
    *   The processed body.
+   * @param \Xylemical\Controller\ContextInterface $context
+   *   The context.
    *
    * @return \Xylemical\Controller\ResultInterface
    *   The result.
@@ -37,7 +43,8 @@ interface ProcessorInterface {
    * @throws \Xylemical\Controller\Exception\UnavailableException
    * @throws \Xylemical\Controller\Exception\DelayedException
    * @throws \Xylemical\Controller\Exception\ErrorException
+   * @throws \Throwable
    */
-  public function getResult(RequestInterface $request, mixed $contents): ResultInterface;
+  public function getResult(RequestInterface $request, mixed $contents, ContextInterface $context): ResultInterface;
 
 }

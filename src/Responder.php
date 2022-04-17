@@ -46,9 +46,9 @@ class Responder implements ResponderInterface {
   /**
    * {@inheritdoc}
    */
-  public function applies(RequestInterface $request, ResultInterface $result): bool {
+  public function applies(RequestInterface $request, ResultInterface $result, ContextInterface $context): bool {
     foreach ($this->responders as $responder) {
-      if ($responder->applies($request, $result)) {
+      if ($responder->applies($request, $result, $context)) {
         return TRUE;
       }
     }
@@ -58,10 +58,10 @@ class Responder implements ResponderInterface {
   /**
    * {@inheritdoc}
    */
-  public function getResponse(RequestInterface $request, ResultInterface $result): ResponseInterface {
+  public function getResponse(RequestInterface $request, ResultInterface $result, ContextInterface $context): ResponseInterface {
     foreach ($this->responders as $responder) {
-      if ($responder->applies($request, $result)) {
-        return $responder->getResponse($request, $result);
+      if ($responder->applies($request, $result, $context)) {
+        return $responder->getResponse($request, $result, $context);
       }
     }
     throw new UnhandledResponseException();

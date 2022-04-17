@@ -14,23 +14,30 @@ interface RequesterInterface {
    *
    * @param \Psr\Http\Message\RequestInterface $request
    *   The request.
+   * @param \Xylemical\Controller\ContextInterface $context
+   *   The context.
    *
    * @return bool
    *   The result.
+   *
+   * @throws \Throwable
    */
-  public function applies(RequestInterface $request): bool;
+  public function applies(RequestInterface $request, ContextInterface $context): bool;
 
   /**
    * Get the body from the request.
    *
    * @param \Psr\Http\Message\RequestInterface $request
    *   The request.
+   * @param \Xylemical\Controller\ContextInterface $context
+   *   The context.
    *
    * @return mixed
    *   The body contents.
    *
    * @throws \Xylemical\Controller\Exception\InvalidBodyException
+   * @throws \Throwable
    */
-  public function getBody(RequestInterface $request): mixed;
+  public function getBody(RequestInterface $request, ContextInterface $context): mixed;
 
 }

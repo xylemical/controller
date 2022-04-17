@@ -45,9 +45,9 @@ class Requester implements RequesterInterface {
   /**
    * {@inheritdoc}
    */
-  public function applies(RequestInterface $request): bool {
+  public function applies(RequestInterface $request, ContextInterface $context): bool {
     foreach ($this->requesters as $requester) {
-      if ($requester->applies($request)) {
+      if ($requester->applies($request, $context)) {
         return TRUE;
       }
     }
@@ -57,10 +57,10 @@ class Requester implements RequesterInterface {
   /**
    * {@inheritdoc}
    */
-  public function getBody(RequestInterface $request): mixed {
+  public function getBody(RequestInterface $request, ContextInterface $context): mixed {
     foreach ($this->requesters as $requester) {
-      if ($requester->applies($request)) {
-        return $requester->getBody($request);
+      if ($requester->applies($request, $context)) {
+        return $requester->getBody($request, $context);
       }
     }
     throw new InvalidBodyException();

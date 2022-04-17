@@ -45,9 +45,9 @@ class Processor implements ProcessorInterface {
   /**
    * {@inheritdoc}
    */
-  public function applies(RequestInterface $request, mixed $contents): bool {
+  public function applies(RequestInterface $request, mixed $contents, ContextInterface $context): bool {
     foreach ($this->processors as $processor) {
-      if ($processor->applies($request, $contents)) {
+      if ($processor->applies($request, $contents, $context)) {
         return TRUE;
       }
     }
@@ -57,10 +57,10 @@ class Processor implements ProcessorInterface {
   /**
    * {@inheritdoc}
    */
-  public function getResult(RequestInterface $request, mixed $contents): ResultInterface {
+  public function getResult(RequestInterface $request, mixed $contents, ContextInterface $context): ResultInterface {
     foreach ($this->processors as $processor) {
-      if ($processor->applies($request, $contents)) {
-        return $processor->getResult($request, $contents);
+      if ($processor->applies($request, $contents, $context)) {
+        return $processor->getResult($request, $contents, $context);
       }
     }
     throw new UnavailableException('Unable to match a valid processor.');

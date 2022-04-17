@@ -24,6 +24,7 @@ class StreamTest extends TestCase {
     $this->assertTrue($stream->isReadable());
     $this->assertTrue($stream->isSeekable());
     $this->assertFalse($stream->isWritable());
+    $this->assertNull($stream->detach());
 
     $this->assertEquals(0, $stream->tell());
     $this->assertEquals(substr($message, 0, 4), $stream->read(4));
