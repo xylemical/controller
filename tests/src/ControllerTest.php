@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Xylemical\Controller\Exception\AccessException;
 use Xylemical\Controller\Exception\DelayedException;
 use Xylemical\Controller\Exception\InvalidBodyException;
@@ -24,7 +25,7 @@ class ControllerTest extends TestCase {
    * @return \Xylemical\Controller\ContextFactoryInterface
    *   The factory.
    */
-  protected function getContextFactory() {
+  protected function getMockContextFactory() {
     $context = $this->getMockBuilder(ContextInterface::class)->getMock();
     $factory = $this->prophesize(ContextFactoryInterface::class);
     $factory->getContext(Argument::any())->willReturn($context);
@@ -40,9 +41,10 @@ class ControllerTest extends TestCase {
    * @return \Prophecy\Prophecy\ObjectProphecy
    *   The responder.
    */
-  protected function getResponder($request) {
+  protected function getMockResponder($request) {
     $responder = $this->prophesize(ResponderInterface::class);
-    $responder->applies($request, Argument::any(), Argument::any())->willReturn(TRUE);
+    $responder->applies($request, Argument::any(), Argument::any())
+      ->willReturn(TRUE);
     $responder->getResponse($request, Argument::any(), Argument::any())
       ->will(function ($args) {
         /** @var \Xylemical\Controller\ResultInterface $result */
@@ -53,6 +55,65 @@ class ControllerTest extends TestCase {
   }
 
   /**
+   * Get a mock middleware.
+   *
+   * @param \Psr\Http\Message\RequestInterface $request
+   *   The request.
+   * @param \Psr\Http\Message\ResponseInterface $response
+   *   The response.
+   * @param int $priority
+   *   The priority.
+   * @param array $sequence
+   *   The processing sequence.
+   *
+   * @return \Xylemical\Controller\MiddlewareInterface
+   *   The mock middleware.
+   */
+  protected function getMockMiddleware(RequestInterface $request, ResponseInterface $response, int $priority, &$sequence): MiddlewareInterface {
+    $middleware = $this->prophesize(MiddlewareInterface::class);
+    $middleware->priority()->willReturn($priority);
+    $middleware->request(Argument::any(), Argument::any(), Argument::any())
+      ->will(function ($args) use ($request, &$sequence) {
+        $sequence['request'][] = $args[1];
+        return $request;
+      });
+    $middleware->response(Argument::any(), Argument::any(), Argument::any())
+      ->will(function ($args) use ($response, &$sequence) {
+        $sequence['response'][] = $args[1];
+        return $response;
+      });
+    return $middleware->reveal();
+  }
+
+
+  /**
+   * Test basic functionality.
+   */
+  public function testSanity() {
+    $request = $this->getMockBuilder(RequestInterface::class)->getMock();
+    $response = $this->getMockBuilder(ResponseInterface::class)->getMock();
+    $middleware = $this->getMockMiddleware($request, $response, 0, $sequence);
+
+    $requester = $this->getMockBuilder(RequesterInterface::class)->getMock();
+    $responder = $this->getMockBuilder(ResponderInterface::class)->getMock();
+    $processor = $this->getMockBuilder(ProcessorInterface::class)->getMock();
+    $factory = $this->getMockContextFactory();
+
+    $controller = new Controller($factory, $requester, $processor, $responder);
+    $this->assertEquals([], $controller->getMiddleware());
+    $controller->addMiddleware($middleware);
+    $this->assertEquals([$middleware], $controller->getMiddleware());
+    $controller->setMiddleware([]);
+    $this->assertEquals([], $controller->getMiddleware());
+    $controller->setMiddleware([$middleware]);
+    $this->assertEquals([$middleware], $controller->getMiddleware());
+
+    $this->assertEquals($requester, $controller->getRequester());
+    $this->assertEquals($responder, $controller->getResponder());
+    $this->assertEquals($processor, $controller->getProcessor());
+  }
+
+  /**
    * Test an invalid body exception.
    */
   public function testInvalidBodyException() {
@@ -60,17 +121,17 @@ class ControllerTest extends TestCase {
 
     $requester = $this->prophesize(RequesterInterface::class);
     $processor = $this->prophesize(ProcessorInterface::class);
-    $responder = $this->getResponder($request);
+    $responder = $this->getMockResponder($request);
 
     $exception = new InvalidBodyException('Test Message');
     $requester->applies($request, Argument::any())->willReturn(TRUE);
     $requester->getBody($request, Argument::any())->willThrow($exception);
 
     $controller = new Controller(
+      $this->getMockContextFactory(),
       $requester->reveal(),
-      $responder->reveal(),
       $processor->reveal(),
-      $this->getContextFactory()
+      $responder->reveal()
     );
 
     $response = $controller->handle($request);
@@ -88,7 +149,7 @@ class ControllerTest extends TestCase {
 
     $requester = $this->prophesize(RequesterInterface::class);
     $processor = $this->prophesize(ProcessorInterface::class);
-    $responder = $this->getResponder($request);
+    $responder = $this->getMockResponder($request);
 
     $requester->applies($request, Argument::any())->willReturn(TRUE);
     $requester->getBody($request, Argument::any())->willReturn($body);
@@ -96,10 +157,10 @@ class ControllerTest extends TestCase {
     $processor->applies($request, $body, Argument::any())->willReturn(FALSE);
 
     $controller = new Controller(
+      $this->getMockContextFactory(),
       $requester->reveal(),
-      $responder->reveal(),
       $processor->reveal(),
-      $this->getContextFactory()
+      $responder->reveal()
     );
 
     $response = $controller->handle($request);
@@ -134,20 +195,21 @@ class ControllerTest extends TestCase {
 
     $requester = $this->prophesize(RequesterInterface::class);
     $processor = $this->prophesize(ProcessorInterface::class);
-    $responder = $this->getResponder($request);
+    $responder = $this->getMockResponder($request);
 
     $requester->applies($request, Argument::any())->willReturn(TRUE);
     $requester->getBody($request, Argument::any())->willReturn($body);
 
     $exception = new $exception('Test Message');
     $processor->applies($request, $body, Argument::any())->willReturn(TRUE);
-    $processor->getResult($request, $body, Argument::any())->willThrow($exception);
+    $processor->getResult($request, $body, Argument::any())
+      ->willThrow($exception);
 
     $controller = new Controller(
+      $this->getMockContextFactory(),
       $requester->reveal(),
-      $responder->reveal(),
       $processor->reveal(),
-      $this->getContextFactory()
+      $responder->reveal()
     );
 
     $response = $controller->handle($request);
@@ -165,7 +227,7 @@ class ControllerTest extends TestCase {
 
     $requester = $this->prophesize(RequesterInterface::class);
     $processor = $this->prophesize(ProcessorInterface::class);
-    $responder = $this->getResponder($request);
+    $responder = $this->getMockResponder($request);
 
     $requester->applies($request, Argument::any())->willReturn(TRUE);
     $requester->getBody($request, Argument::any())->willReturn($body);
@@ -175,10 +237,10 @@ class ControllerTest extends TestCase {
       ->willReturn(Result::complete('Test Message'));
 
     $controller = new Controller(
+      $this->getMockContextFactory(),
       $requester->reveal(),
-      $responder->reveal(),
       $processor->reveal(),
-      $this->getContextFactory()
+      $responder->reveal()
     );
 
     $response = $controller->handle($request);
@@ -197,8 +259,10 @@ class ControllerTest extends TestCase {
     $requester = $this->prophesize(RequesterInterface::class);
     $processor = $this->prophesize(ProcessorInterface::class);
     $responder = $this->prophesize(ResponderInterface::class);
-    $responder->applies($request, Argument::any(), Argument::any())->willReturn(TRUE);
-    $responder->getResponse($request, Argument::any(), Argument::any())->willThrow($exception);
+    $responder->applies($request, Argument::any(), Argument::any())
+      ->willReturn(TRUE);
+    $responder->getResponse($request, Argument::any(), Argument::any())
+      ->willThrow($exception);
 
     $requester->applies($request, Argument::any())->willReturn(TRUE);
     $requester->getBody($request, Argument::any())->willReturn($body);
@@ -208,10 +272,10 @@ class ControllerTest extends TestCase {
       ->willReturn(Result::complete('Test Message'));
 
     $controller = new Controller(
+      $this->getMockContextFactory(),
       $requester->reveal(),
-      $responder->reveal(),
       $processor->reveal(),
-      $this->getContextFactory()
+      $responder->reveal()
     );
 
     $response = $controller->handle($request);
@@ -229,7 +293,8 @@ class ControllerTest extends TestCase {
     $requester = $this->prophesize(RequesterInterface::class);
     $processor = $this->prophesize(ProcessorInterface::class);
     $responder = $this->prophesize(ResponderInterface::class);
-    $responder->applies($request, Argument::any(), Argument::any())->willReturn(FALSE);
+    $responder->applies($request, Argument::any(), Argument::any())
+      ->willReturn(FALSE);
 
     $requester->applies($request, Argument::any())->willReturn(TRUE);
     $requester->getBody($request, Argument::any())->willReturn($body);
@@ -239,15 +304,96 @@ class ControllerTest extends TestCase {
       ->willReturn(Result::complete('Test Message'));
 
     $controller = new Controller(
+      $this->getMockContextFactory(),
       $requester->reveal(),
-      $responder->reveal(),
       $processor->reveal(),
-      $this->getContextFactory()
+      $responder->reveal()
     );
 
     $response = $controller->handle($request);
     $this->assertEquals(500, $response->getStatusCode());
     $this->assertEquals('The responder is unable to respond.', $response->getReasonPhrase());
+  }
+
+
+  /**
+   * Test middleware.
+   */
+  public function testMiddleware() {
+    $middlewares = [
+      'a' => [
+        $this->getMockBuilder(RequestInterface::class)->getMock(),
+        $this->getMockBuilder(ResponseInterface::class)->getMock(),
+        1,
+      ],
+      'b' => [
+        $this->getMockBuilder(RequestInterface::class)->getMock(),
+        $this->getMockBuilder(ResponseInterface::class)->getMock(),
+        0,
+      ],
+      'c' => [
+        $this->getMockBuilder(RequestInterface::class)->getMock(),
+        $this->getMockBuilder(ResponseInterface::class)->getMock(),
+        0,
+      ],
+      'd' => [
+        $this->getMockBuilder(RequestInterface::class)->getMock(),
+        $this->getMockBuilder(ResponseInterface::class)->getMock(),
+        -1,
+      ],
+    ];
+
+    $request = $this->getMockBuilder(RequestInterface::class)->getMock();
+    $response = $this->getMockBuilder(ResponseInterface::class)->getMock();
+
+    $requester = $this->prophesize(RequesterInterface::class);
+    $requester->applies(Argument::any(), Argument::any())->willReturn(TRUE);
+    $requester->getBody(Argument::any(), Argument::any())
+      ->willReturn([]);
+
+    $processor = $this->prophesize(ProcessorInterface::class);
+    $processor->applies($middlewares['a'][0], Argument::any(), Argument::any())
+      ->willReturn(new Result(0, NULL));
+
+    $responder = $this->prophesize(ResponderInterface::class);
+    $responder->applies(Argument::any(), Argument::any(), Argument::any())
+      ->willReturn(TRUE);
+    $responder->getResponse(Argument::any(), Argument::any(), Argument::any())
+      ->willReturn($response);
+
+    $controller = new Controller(
+      $this->getMockContextFactory(),
+      $requester->reveal(),
+      $processor->reveal(),
+      $responder->reveal()
+    );
+
+    $sequence = [];
+    foreach ($middlewares as $middleware) {
+      $controller->addMiddleware(
+        $this->getMockMiddleware(
+          $middleware[0],
+          $middleware[1],
+          $middleware[2],
+          $sequence
+        )
+      );
+    }
+
+    $response = $controller->handle($request);
+    $this->assertEquals($response, $middlewares['d'][1]);
+    $this->assertEquals([
+      $request,
+      $middlewares['d'][0],
+      $middlewares['b'][0],
+      $middlewares['c'][0],
+    ], $sequence['request']);
+    $this->assertEquals([
+      $response,
+      $middlewares['a'][1],
+      $middlewares['c'][1],
+      $middlewares['b'][1],
+    ], $sequence['response']);
   }
 
 }
