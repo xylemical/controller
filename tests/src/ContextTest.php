@@ -5,14 +5,14 @@ namespace Xylemical\Controller;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests \Xylemical\Controller\Context
+ * Tests \Xylemical\Controller\Context.
  */
 class ContextTest extends TestCase {
 
   /**
    * Test the context.
    */
-  public function testContext() {
+  public function testContext(): void {
     $context = new Context(['test' => 1]);
     $this->assertEquals(['test' => 1], $context->all());
     $this->assertTrue($context->has('test'));

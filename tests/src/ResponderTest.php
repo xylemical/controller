@@ -7,7 +7,6 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Xylemical\Controller\Exception\UnavailableException;
 use Xylemical\Controller\Exception\UnhandledResponseException;
 
 /**
@@ -20,7 +19,7 @@ class ResponderTest extends TestCase {
   /**
    * Test the responder.
    */
-  public function testResponder() {
+  public function testResponder(): void {
     $request = $this->getMockBuilder(RequestInterface::class)->getMock();
     $result = $this->getMockBuilder(ResultInterface::class)->getMock();
     $response = $this->getMockBuilder(ResponseInterface::class)->getMock();

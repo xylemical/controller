@@ -18,7 +18,7 @@ class ProcessorTest extends TestCase {
   /**
    * Test the processor.
    */
-  public function testProcessor() {
+  public function testProcessor(): void {
     $request = $this->getMockBuilder(RequestInterface::class)->getMock();
     $result = $this->getMockBuilder(ResultInterface::class)->getMock();
     $context = $this->getMockBuilder(ContextInterface::class)->getMock();

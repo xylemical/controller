@@ -5,6 +5,7 @@ namespace Xylemical\Controller;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Xylemical\Controller\Exception\AccessException;
@@ -25,7 +26,7 @@ class ControllerTest extends TestCase {
    * @return \Xylemical\Controller\ContextFactoryInterface
    *   The factory.
    */
-  protected function getMockContextFactory() {
+  protected function getMockContextFactory(): ContextFactoryInterface {
     $context = $this->getMockBuilder(ContextInterface::class)->getMock();
     $factory = $this->prophesize(ContextFactoryInterface::class);
     $factory->getContext(Argument::any())->willReturn($context);
@@ -41,7 +42,7 @@ class ControllerTest extends TestCase {
    * @return \Prophecy\Prophecy\ObjectProphecy
    *   The responder.
    */
-  protected function getMockResponder($request) {
+  protected function getMockResponder(RequestInterface $request): ObjectProphecy {
     $responder = $this->prophesize(ResponderInterface::class);
     $responder->applies($request, Argument::any(), Argument::any())
       ->willReturn(TRUE);
@@ -63,13 +64,13 @@ class ControllerTest extends TestCase {
    *   The response.
    * @param int $priority
    *   The priority.
-   * @param array $sequence
+   * @param array|null $sequence
    *   The processing sequence.
    *
    * @return \Xylemical\Controller\MiddlewareInterface
    *   The mock middleware.
    */
-  protected function getMockMiddleware(RequestInterface $request, ResponseInterface $response, int $priority, &$sequence): MiddlewareInterface {
+  protected function getMockMiddleware(RequestInterface $request, ResponseInterface $response, int $priority, ?array &$sequence): MiddlewareInterface {
     $middleware = $this->prophesize(MiddlewareInterface::class);
     $middleware->priority()->willReturn($priority);
     $middleware->request(Argument::any(), Argument::any(), Argument::any())
@@ -85,11 +86,10 @@ class ControllerTest extends TestCase {
     return $middleware->reveal();
   }
 
-
   /**
    * Test basic functionality.
    */
-  public function testSanity() {
+  public function testSanity(): void {
     $request = $this->getMockBuilder(RequestInterface::class)->getMock();
     $response = $this->getMockBuilder(ResponseInterface::class)->getMock();
     $middleware = $this->getMockMiddleware($request, $response, 0, $sequence);
@@ -116,7 +116,7 @@ class ControllerTest extends TestCase {
   /**
    * Test an invalid body exception.
    */
-  public function testInvalidBodyException() {
+  public function testInvalidBodyException(): void {
     $request = $this->getMockBuilder(RequestInterface::class)->getMock();
 
     $requester = $this->prophesize(RequesterInterface::class);
@@ -143,7 +143,7 @@ class ControllerTest extends TestCase {
   /**
    * Test when missing a processor that applies.
    */
-  public function testMissingProcessor() {
+  public function testMissingProcessor(): void {
     $request = $this->getMockBuilder(RequestInterface::class)->getMock();
     $body = ['body'];
 
@@ -175,7 +175,7 @@ class ControllerTest extends TestCase {
    * @return array[]
    *   The data.
    */
-  public function providerTestProcessorExceptions() {
+  public function providerTestProcessorExceptions(): array {
     return [
       [AccessException::class, ResultInterface::STATUS_ACCESS],
       [DelayedException::class, ResultInterface::STATUS_DELAYED],
@@ -189,7 +189,7 @@ class ControllerTest extends TestCase {
    *
    * @dataProvider providerTestProcessorExceptions
    */
-  public function testProcessorExceptions($exception, $status) {
+  public function testProcessorExceptions(string $exception, int $status): void {
     $request = $this->getMockBuilder(RequestInterface::class)->getMock();
     $body = ['body'];
 
@@ -221,7 +221,7 @@ class ControllerTest extends TestCase {
   /**
    * Test the processor success.
    */
-  public function testProcessor() {
+  public function testProcessor(): void {
     $request = $this->getMockBuilder(RequestInterface::class)->getMock();
     $body = ['body'];
 
@@ -251,7 +251,7 @@ class ControllerTest extends TestCase {
   /**
    * Test response exception.
    */
-  public function testResponseException() {
+  public function testResponseException(): void {
     $request = $this->getMockBuilder(RequestInterface::class)->getMock();
     $body = ['body'];
 
@@ -286,7 +286,7 @@ class ControllerTest extends TestCase {
   /**
    * Test response exception.
    */
-  public function testResponderFailure() {
+  public function testResponderFailure(): void {
     $request = $this->getMockBuilder(RequestInterface::class)->getMock();
     $body = ['body'];
 
@@ -315,11 +315,10 @@ class ControllerTest extends TestCase {
     $this->assertEquals('The responder is unable to respond.', $response->getReasonPhrase());
   }
 
-
   /**
    * Test middleware.
    */
-  public function testMiddleware() {
+  public function testMiddleware(): void {
     $middlewares = [
       'a' => [
         $this->getMockBuilder(RequestInterface::class)->getMock(),

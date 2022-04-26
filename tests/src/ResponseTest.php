@@ -12,7 +12,7 @@ class ResponseTest extends TestCase {
   /**
    * Tests a response.
    */
-  public function testResponse() {
+  public function testResponse(): void {
     $response = new Response();
     $this->assertEquals(200, $response->getStatusCode());
     $this->assertEquals('', $response->getBody()->getContents());

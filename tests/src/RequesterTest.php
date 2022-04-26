@@ -7,7 +7,6 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
 use Xylemical\Controller\Exception\InvalidBodyException;
-use Xylemical\Controller\Exception\UnavailableException;
 
 /**
  * Test the \Xylemical\Controller\Requester class.
@@ -19,11 +18,10 @@ class RequesterTest extends TestCase {
   /**
    * Test the requester.
    */
-  public function testRequester() {
+  public function testRequester(): void {
     $context = $this->getMockBuilder(ContextInterface::class)->getMock();
     $request = $this->getMockBuilder(RequestInterface::class)->getMock();
     $body = ['body'];
-
 
     $child = $this->prophesize(RequesterInterface::class);
     $child->applies($request, Argument::any())->willReturn(TRUE);

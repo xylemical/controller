@@ -14,7 +14,7 @@ class StreamTest extends TestCase {
   /**
    * Test basic stream functionality.
    */
-  public function testStream() {
+  public function testStream(): void {
     $message = 'Test Message';
     $size = strlen($message);
 
@@ -34,7 +34,7 @@ class StreamTest extends TestCase {
     $this->assertEquals($size, $stream->tell());
     $this->assertEquals('', $stream->getContents());
     $this->assertTrue($stream->eof());
-    $this->assertEquals($message, (string)$stream);
+    $this->assertEquals($message, (string) $stream);
 
     $stream->rewind();
     $this->assertEquals($message, $stream->getContents());

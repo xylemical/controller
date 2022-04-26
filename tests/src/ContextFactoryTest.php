@@ -13,7 +13,7 @@ class ContextFactoryTest extends TestCase {
   /**
    * Test the factory.
    */
-  public function testFactory() {
+  public function testFactory(): void {
     $request = $this->getMockBuilder(RequestInterface::class)->getMock();
 
     $factory = new ContextFactory();
