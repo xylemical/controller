@@ -22,8 +22,9 @@
   },
   "require": {
     "php": ">7.4",
-    "psr/http-message": "^1.0",
-    "psr/container": "^2.0"
+    "psr/http-message": ">=1.0",
+    "psr/container": ">=2.0",
+    "xylemical/account": "dev-master"
   },
   "require-dev": {
     "xylemical/composer-dev-bundle": "^0.1.1"

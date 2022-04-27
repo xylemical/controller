@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Xylemical\Controller;
 
 use Psr\Http\Message\ResponseInterface;

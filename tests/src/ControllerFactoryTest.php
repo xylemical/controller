@@ -5,6 +5,8 @@ namespace Xylemical\Controller;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Http\Message\RequestInterface;
+use Xylemical\Controller\Authentication\AuthenticationFactoryInterface;
+use Xylemical\Controller\Authentication\AuthenticationInterface;
 
 /**
  * Tests \Xylemical\Controller\ControllerFactory.
@@ -38,19 +40,29 @@ class ControllerFactoryTest extends TestCase {
     $middlewareFactory = $this->prophesize(MiddlewareFactoryInterface::class);
     $middlewareFactory->getMiddleware($request)->willReturn([$middleware]);
 
-    $factory = new ControllerFactory();
-    $controller = $factory->getController(
+    $authentication = $this->getMockBuilder(AuthenticationInterface::class)->getMock();
+    $authenticationFactory = $this->prophesize(AuthenticationFactoryInterface::class);
+    $authenticationFactory->getAuthentication($request)->willReturn($authentication);
+    $authenticationFactory = $authenticationFactory->reveal();
+
+    $factory = new ControllerFactory(
       $contextFactory,
       $requesterFactory->reveal(),
       $processorFactory->reveal(),
       $responderFactory->reveal(),
       $middlewareFactory->reveal(),
-      $request
     );
+
+    $this->assertNull($factory->getAuthenticationFactory());
+    $factory->setAuthenticationFactory($authenticationFactory);
+    $this->assertSame($authenticationFactory, $factory->getAuthenticationFactory());
+
+    $controller = $factory->getController($request);
     $this->assertSame($responder, $controller->getResponder());
     $this->assertSame($processor, $controller->getProcessor());
     $this->assertSame($requester, $controller->getRequester());
-    $this->assertEquals([$middleware], $controller->getMIddleware());
+    $this->assertEquals([$middleware], $controller->getMiddleware());
+    $this->assertSame($authentication, $controller->getAuthentication());
   }
 
 }

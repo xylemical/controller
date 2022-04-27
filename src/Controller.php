@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
 namespace Xylemical\Controller;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Xylemical\Account\AccountInterface;
+use Xylemical\Controller\Authentication\AuthenticationInterface;
 use Xylemical\Controller\Exception\AccessException;
 use Xylemical\Controller\Exception\DelayedException;
 use Xylemical\Controller\Exception\UnavailableException;
@@ -40,6 +43,13 @@ class Controller {
    * @var \Xylemical\Controller\ContextFactoryInterface
    */
   protected ContextFactoryInterface $factory;
+
+  /**
+   * The authentication layer.
+   *
+   * @var \Xylemical\Controller\Authentication\AuthenticationInterface|null
+   */
+  protected ?AuthenticationInterface $authentication = NULL;
 
   /**
    * The middleware.
@@ -141,6 +151,29 @@ class Controller {
   }
 
   /**
+   * Set the authentication layer.
+   *
+   * @return \Xylemical\Controller\Authentication\AuthenticationInterface|null
+   *   The authentication or NULL.
+   */
+  public function getAuthentication(): ?AuthenticationInterface {
+    return $this->authentication;
+  }
+
+  /**
+   * Set the authentication layer.
+   *
+   * @param \Xylemical\Controller\Authentication\AuthenticationInterface|null $authentication
+   *   The authentication.
+   *
+   * @return $this
+   */
+  public function setAuthentication(?AuthenticationInterface $authentication): static {
+    $this->authentication = $authentication;
+    return $this;
+  }
+
+  /**
    * Handles the request and response.
    *
    * @param \Psr\Http\Message\RequestInterface $request
@@ -152,6 +185,7 @@ class Controller {
   public function handle(RequestInterface $request): ResponseInterface {
     try {
       $context = $this->factory->getContext($request);
+      $request = $this->doAuthentication($request, $context);
       $request = $this->doRequest($request, $context);
       $body = $this->requester->getBody($request, $context);
     }
@@ -199,6 +233,26 @@ class Controller {
   }
 
   /**
+   * Perform the authentication.
+   *
+   * @param \Psr\Http\Message\RequestInterface $request
+   *   The request.
+   * @param \Xylemical\Controller\ContextInterface $context
+   *   The context.
+   *
+   * @return \Psr\Http\Message\RequestInterface
+   *   The request.
+   */
+  protected function doAuthentication(RequestInterface $request, ContextInterface $context): RequestInterface {
+    if ($this->authentication) {
+      $this->authentication->setRequest($request);
+      $account = $this->authentication->authenticate();
+      $context->set(AccountInterface::class, $account);
+    }
+    return $request;
+  }
+
+  /**
    * Perform middleware requests.
    *
    * @param \Psr\Http\Message\RequestInterface $request
@@ -212,7 +266,7 @@ class Controller {
    * @throws \Throwable
    */
   protected function doRequest(RequestInterface $request, ContextInterface $context): RequestInterface {
-    ksort($this->middleware);
+    krsort($this->middleware);
     foreach ($this->middleware as $middlewares) {
       foreach ($middlewares as $middleware) {
         $request = $middleware->request($this, $request, $context);
@@ -235,7 +289,7 @@ class Controller {
    * @throws \Throwable
    */
   protected function doResponse(ResponseInterface $response, ContextInterface $context): ResponseInterface {
-    krsort($this->middleware);
+    ksort($this->middleware);
     foreach ($this->middleware as $middlewares) {
       foreach (array_reverse($middlewares) as $middleware) {
         $response = $middleware->response($this, $response, $context);
