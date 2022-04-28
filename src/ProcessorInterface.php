@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Xylemical\Controller;
 
-use Psr\Http\Message\RequestInterface;
-
 /**
  * Processes a request into a result.
  */
@@ -14,29 +12,25 @@ interface ProcessorInterface {
   /**
    * Check the processor applies to the request.
    *
-   * @param \Psr\Http\Message\RequestInterface $request
-   *   The result.
+   * @param \Xylemical\Controller\RouteInterface $route
+   *   The route.
    * @param mixed $contents
    *   The processed body results.
-   * @param \Xylemical\Controller\ContextInterface $context
-   *   The context.
    *
    * @return bool
    *   The result.
    *
    * @throws \Throwable
    */
-  public function applies(RequestInterface $request, mixed $contents, ContextInterface $context): bool;
+  public function applies(RouteInterface $route, mixed $contents): bool;
 
   /**
    * Process the request into a result.
    *
-   * @param \Psr\Http\Message\RequestInterface $request
-   *   The request.
+   * @param \Xylemical\Controller\RouteInterface $route
+   *   The route.
    * @param mixed $contents
    *   The processed body.
-   * @param \Xylemical\Controller\ContextInterface $context
-   *   The context.
    *
    * @return \Xylemical\Controller\ResultInterface
    *   The result.
@@ -47,6 +41,6 @@ interface ProcessorInterface {
    * @throws \Xylemical\Controller\Exception\ErrorException
    * @throws \Throwable
    */
-  public function getResult(RequestInterface $request, mixed $contents, ContextInterface $context): ResultInterface;
+  public function getResult(RouteInterface $route, mixed $contents): ResultInterface;
 
 }

@@ -5,7 +5,6 @@ namespace Xylemical\Controller;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Psr\Http\Message\RequestInterface;
 use Xylemical\Controller\Exception\InvalidBodyException;
 
 /**
@@ -19,32 +18,31 @@ class RequesterTest extends TestCase {
    * Test the requester.
    */
   public function testRequester(): void {
-    $context = $this->getMockBuilder(ContextInterface::class)->getMock();
-    $request = $this->getMockBuilder(RequestInterface::class)->getMock();
+    $route = $this->getMockBuilder(RouteInterface::class)->getMock();
     $body = ['body'];
 
     $child = $this->prophesize(RequesterInterface::class);
-    $child->applies($request, Argument::any())->willReturn(TRUE);
-    $child->getBody($request, Argument::any())->willReturn($body);
+    $child->applies($route, Argument::any())->willReturn(TRUE);
+    $child->getBody($route, Argument::any())->willReturn($body);
 
     $child = $child->reveal();
 
     $requester = new Requester([$child]);
 
-    $this->assertTrue($requester->applies($request, $context));
-    $this->assertEquals($body, $requester->getBody($request, $context));
+    $this->assertTrue($requester->applies($route));
+    $this->assertEquals($body, $requester->getBody($route));
 
     $requester = new Requester();
     $requester->addRequester($child);
 
-    $this->assertTrue($requester->applies($request, $context));
-    $this->assertEquals($body, $requester->getBody($request, $context));
+    $this->assertTrue($requester->applies($route));
+    $this->assertEquals($body, $requester->getBody($route));
 
     $requester = new Requester();
 
-    $this->assertFalse($requester->applies($request, $context));
+    $this->assertFalse($requester->applies($route));
     $this->expectException(InvalidBodyException::class);
-    $requester->getBody($request, $context);
+    $requester->getBody($route);
   }
 
 }

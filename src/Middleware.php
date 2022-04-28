@@ -1,9 +1,9 @@
 <?php
 
 declare(strict_types=1);
+
 namespace Xylemical\Controller;
 
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -38,14 +38,13 @@ class Middleware implements MiddlewareInterface {
   /**
    * {@inheritdoc}
    */
-  public function request(Controller $controller, RequestInterface $request, ContextInterface $context): RequestInterface {
-    return $request;
+  public function request(RouteInterface $route): void {
   }
 
   /**
    * {@inheritdoc}
    */
-  public function response(Controller $controller, ResponseInterface $response, ContextInterface $context): ResponseInterface {
+  public function response(RouteInterface $route, ResponseInterface $response): ResponseInterface {
     return $response;
   }
 

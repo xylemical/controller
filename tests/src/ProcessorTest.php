@@ -5,7 +5,6 @@ namespace Xylemical\Controller;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Psr\Http\Message\RequestInterface;
 use Xylemical\Controller\Exception\UnavailableException;
 
 /**
@@ -19,34 +18,33 @@ class ProcessorTest extends TestCase {
    * Test the processor.
    */
   public function testProcessor(): void {
-    $request = $this->getMockBuilder(RequestInterface::class)->getMock();
+    $route = $this->getMockBuilder(RouteInterface::class)->getMock();
     $result = $this->getMockBuilder(ResultInterface::class)->getMock();
-    $context = $this->getMockBuilder(ContextInterface::class)->getMock();
 
     $body = [];
 
     $child = $this->prophesize(ProcessorInterface::class);
-    $child->applies($request, $body, Argument::any())->willReturn(TRUE);
-    $child->getResult($request, $body, Argument::any())->willReturn($result);
+    $child->applies($route, Argument::any())->willReturn(TRUE);
+    $child->getResult($route, Argument::any())->willReturn($result);
 
     $child = $child->reveal();
 
     $processor = new Processor([$child]);
 
-    $this->assertTrue($processor->applies($request, $body, $context));
-    $this->assertEquals($result, $processor->getResult($request, $body, $context));
+    $this->assertTrue($processor->applies($route, $body));
+    $this->assertEquals($result, $processor->getResult($route, $body));
 
     $processor = new Processor();
     $processor->addProcessor($child);
 
-    $this->assertTrue($processor->applies($request, $body, $context));
-    $this->assertEquals($result, $processor->getResult($request, $body, $context));
+    $this->assertTrue($processor->applies($route, $body));
+    $this->assertEquals($result, $processor->getResult($route, $body));
 
     $processor = new Processor();
 
-    $this->assertFalse($processor->applies($request, $body, $context));
+    $this->assertFalse($processor->applies($route, $body));
     $this->expectException(UnavailableException::class);
-    $processor->getResult($request, $body, $context);
+    $processor->getResult($route, $body);
   }
 
 }

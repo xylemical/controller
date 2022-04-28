@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Xylemical\Controller;
 
-use Psr\Http\Message\RequestInterface;
-
 /**
  * Provides a factory mechanism for responders.
  */
@@ -14,12 +12,14 @@ interface ResponderFactoryInterface {
   /**
    * Create a responder for a request.
    *
-   * @param \Psr\Http\Message\RequestInterface $request
-   *   The request.
+   * @param \Xylemical\Controller\RouteInterface $route
+   *   The route.
+   * @param \Xylemical\Controller\ResultInterface $result
+   *   The result.
    *
    * @return \Xylemical\Controller\ResponderInterface
    *   The responder.
    */
-  public function getResponder(RequestInterface $request): ResponderInterface;
+  public function getResponder(RouteInterface $route, ResultInterface $result): ResponderInterface;
 
 }

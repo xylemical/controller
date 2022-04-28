@@ -5,7 +5,6 @@ namespace Xylemical\Controller;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Xylemical\Controller\Exception\UnhandledResponseException;
 
@@ -20,33 +19,32 @@ class ResponderTest extends TestCase {
    * Test the responder.
    */
   public function testResponder(): void {
-    $request = $this->getMockBuilder(RequestInterface::class)->getMock();
+    $route = $this->getMockBuilder(RouteInterface::class)->getMock();
     $result = $this->getMockBuilder(ResultInterface::class)->getMock();
     $response = $this->getMockBuilder(ResponseInterface::class)->getMock();
-    $context = $this->getMockBuilder(ContextInterface::class)->getMock();
 
     $child = $this->prophesize(ResponderInterface::class);
-    $child->applies($request, $result, Argument::any())->willReturn(TRUE);
-    $child->getResponse($request, $result, Argument::any())->willReturn($response);
+    $child->applies($route, $result, Argument::any())->willReturn(TRUE);
+    $child->getResponse($route, $result, Argument::any())->willReturn($response);
 
     $child = $child->reveal();
 
     $responder = new Responder([$child]);
 
-    $this->assertTrue($responder->applies($request, $result, $context));
-    $this->assertEquals($response, $responder->getResponse($request, $result, $context));
+    $this->assertTrue($responder->applies($route, $result));
+    $this->assertEquals($response, $responder->getResponse($route, $result));
 
     $responder = new Responder();
     $responder->addResponder($child);
 
-    $this->assertTrue($responder->applies($request, $result, $context));
-    $this->assertEquals($response, $responder->getResponse($request, $result, $context));
+    $this->assertTrue($responder->applies($route, $result));
+    $this->assertEquals($response, $responder->getResponse($route, $result));
 
     $responder = new Responder();
 
-    $this->assertFalse($responder->applies($request, $result, $context));
+    $this->assertFalse($responder->applies($route, $result));
     $this->expectException(UnhandledResponseException::class);
-    $responder->getResponse($request, $result, $context);
+    $responder->getResponse($route, $result);
   }
 
 }

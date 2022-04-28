@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Xylemical\Controller;
 
-use Psr\Http\Message\RequestInterface;
 use Xylemical\Controller\Exception\UnavailableException;
 
 /**
@@ -47,9 +46,9 @@ class Processor implements ProcessorInterface {
   /**
    * {@inheritdoc}
    */
-  public function applies(RequestInterface $request, mixed $contents, ContextInterface $context): bool {
+  public function applies(RouteInterface $route, mixed $contents): bool {
     foreach ($this->processors as $processor) {
-      if ($processor->applies($request, $contents, $context)) {
+      if ($processor->applies($route, $contents)) {
         return TRUE;
       }
     }
@@ -59,10 +58,10 @@ class Processor implements ProcessorInterface {
   /**
    * {@inheritdoc}
    */
-  public function getResult(RequestInterface $request, mixed $contents, ContextInterface $context): ResultInterface {
+  public function getResult(RouteInterface $route, mixed $contents): ResultInterface {
     foreach ($this->processors as $processor) {
-      if ($processor->applies($request, $contents, $context)) {
-        return $processor->getResult($request, $contents, $context);
+      if ($processor->applies($route, $contents)) {
+        return $processor->getResult($route, $contents);
       }
     }
     throw new UnavailableException('Unable to match a valid processor.');

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Xylemical\Controller;
 
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Xylemical\Controller\Exception\UnhandledResponseException;
 
@@ -48,9 +47,9 @@ class Responder implements ResponderInterface {
   /**
    * {@inheritdoc}
    */
-  public function applies(RequestInterface $request, ResultInterface $result, ContextInterface $context): bool {
+  public function applies(RouteInterface $route, ResultInterface $result): bool {
     foreach ($this->responders as $responder) {
-      if ($responder->applies($request, $result, $context)) {
+      if ($responder->applies($route, $result)) {
         return TRUE;
       }
     }
@@ -60,10 +59,10 @@ class Responder implements ResponderInterface {
   /**
    * {@inheritdoc}
    */
-  public function getResponse(RequestInterface $request, ResultInterface $result, ContextInterface $context): ResponseInterface {
+  public function getResponse(RouteInterface $route, ResultInterface $result): ResponseInterface {
     foreach ($this->responders as $responder) {
-      if ($responder->applies($request, $result, $context)) {
-        return $responder->getResponse($request, $result, $context);
+      if ($responder->applies($route, $result)) {
+        return $responder->getResponse($route, $result);
       }
     }
     throw new UnhandledResponseException();

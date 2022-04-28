@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Xylemical\Controller;
 
-use Psr\Http\Message\RequestInterface;
 use Xylemical\Controller\Exception\InvalidBodyException;
 
 /**
@@ -47,9 +46,9 @@ class Requester implements RequesterInterface {
   /**
    * {@inheritdoc}
    */
-  public function applies(RequestInterface $request, ContextInterface $context): bool {
+  public function applies(RouteInterface $route): bool {
     foreach ($this->requesters as $requester) {
-      if ($requester->applies($request, $context)) {
+      if ($requester->applies($route)) {
         return TRUE;
       }
     }
@@ -59,10 +58,10 @@ class Requester implements RequesterInterface {
   /**
    * {@inheritdoc}
    */
-  public function getBody(RequestInterface $request, ContextInterface $context): mixed {
+  public function getBody(RouteInterface $route): mixed {
     foreach ($this->requesters as $requester) {
-      if ($requester->applies($request, $context)) {
-        return $requester->getBody($request, $context);
+      if ($requester->applies($route)) {
+        return $requester->getBody($route);
       }
     }
     throw new InvalidBodyException();

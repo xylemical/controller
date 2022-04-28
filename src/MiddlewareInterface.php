@@ -1,9 +1,9 @@
 <?php
 
 declare(strict_types=1);
+
 namespace Xylemical\Controller;
 
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -22,35 +22,26 @@ interface MiddlewareInterface {
   /**
    * Process the request.
    *
-   * @param \Xylemical\Controller\Controller $controller
-   *   The controller.
-   * @param \Psr\Http\Message\RequestInterface $request
-   *   The request.
-   * @param \Xylemical\Controller\ContextInterface $context
-   *   The context.
-   *
-   * @return \Psr\Http\Message\RequestInterface
-   *   The request.
+   * @param \Xylemical\Controller\RouteInterface $route
+   *   The route.
    *
    * @throws \Throwable
    */
-  public function request(Controller $controller, RequestInterface $request, ContextInterface $context): RequestInterface;
+  public function request(RouteInterface $route): void;
 
   /**
    * Process the response.
    *
-   * @param \Xylemical\Controller\Controller $controller
-   *   The controller.
+   * @param \Xylemical\Controller\RouteInterface $route
+   *   The route.
    * @param \Psr\Http\Message\ResponseInterface $response
    *   The response.
-   * @param \Xylemical\Controller\ContextInterface $context
-   *   The context.
    *
    * @return \Psr\Http\Message\ResponseInterface
    *   The updated response.
    *
    * @throws \Throwable
    */
-  public function response(Controller $controller, ResponseInterface $response, ContextInterface $context): ResponseInterface;
+  public function response(RouteInterface $route, ResponseInterface $response): ResponseInterface;
 
 }

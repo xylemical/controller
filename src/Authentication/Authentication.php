@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Xylemical\Controller\Authentication;
 
-use Psr\Http\Message\RequestInterface;
 use Xylemical\Account\AccountInterface;
+use Xylemical\Controller\RouteInterface;
 
 /**
  * Provide a base authentication class.
@@ -13,38 +13,16 @@ use Xylemical\Account\AccountInterface;
 class Authentication implements AuthenticationInterface {
 
   /**
-   * The request.
-   *
-   * @var \Psr\Http\Message\RequestInterface|null
-   */
-  protected ?RequestInterface $request = NULL;
-
-  /**
    * {@inheritdoc}
    */
-  public function applies(RequestInterface $request): bool {
+  public function applies(RouteInterface $route): bool {
     return FALSE;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getRequest(): ?RequestInterface {
-    return $this->request;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setRequest(?RequestInterface $request): static {
-    $this->request = $request;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function authenticate(): ?AccountInterface {
+  public function authenticate(RouteInterface $route): ?AccountInterface {
     return NULL;
   }
 
