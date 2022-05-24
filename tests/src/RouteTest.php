@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Xylemical\Controller;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Tests \Xylemical\Controller\Route.
@@ -16,7 +16,7 @@ class RouteTest extends TestCase {
    * Test sanity.
    */
   public function testSanity(): void {
-    $request = $this->getMockBuilder(RequestInterface::class)->getMock();
+    $request = $this->getMockBuilder(ServerRequestInterface::class)->getMock();
     $context = $this->getMockBuilder(ContextInterface::class)->getMock();
 
     $args = ['arg' => TRUE];
@@ -26,7 +26,7 @@ class RouteTest extends TestCase {
     $this->assertSame($request, $route->getRequest());
     $this->assertSame($context, $route->getContext());
 
-    $request = $this->getMockBuilder(RequestInterface::class)->getMock();
+    $request = $this->getMockBuilder(ServerRequestInterface::class)->getMock();
     $this->assertNotSame($request, $route->getRequest());
     $route->setRequest($request);
     $this->assertSame($request, $route->getRequest());

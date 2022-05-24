@@ -6,6 +6,7 @@ namespace Xylemical\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use function implode;
 
 /**
  * Generic response.

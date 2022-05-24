@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Xylemical\Controller;
 
-use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Xylemical\Account\AccountInterface;
 
 /**
@@ -31,20 +31,20 @@ interface RouteInterface {
   /**
    * Get the request for the route.
    *
-   * @return \Psr\Http\Message\RequestInterface
+   * @return \Psr\Http\Message\ServerRequestInterface
    *   The request.
    */
-  public function getRequest(): RequestInterface;
+  public function getRequest(): ServerRequestInterface;
 
   /**
    * Set the request for the route.
    *
-   * @param \Psr\Http\Message\RequestInterface $request
+   * @param \Psr\Http\Message\ServerRequestInterface $request
    *   The request.
    *
    * @return $this
    */
-  public function setRequest(RequestInterface $request): static;
+  public function setRequest(ServerRequestInterface $request): static;
 
   /**
    * Get the context for the route.

@@ -3,7 +3,7 @@
 namespace Xylemical\Controller;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Tests \Xylemical\Controller\ContextFactory.
@@ -14,7 +14,7 @@ class ContextFactoryTest extends TestCase {
    * Test the factory.
    */
   public function testFactory(): void {
-    $request = $this->getMockBuilder(RequestInterface::class)->getMock();
+    $request = $this->getMockBuilder(ServerRequestInterface::class)->getMock();
 
     $factory = new ContextFactory();
 

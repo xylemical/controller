@@ -5,7 +5,7 @@ namespace Xylemical\Controller;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Xylemical\Account\AccountInterface;
 use Xylemical\Controller\Authentication\AuthenticationFactoryInterface;
@@ -392,7 +392,7 @@ class ControllerTest extends TestCase {
    */
   public function testAuth(mixed $authentication, mixed $authorization): void {
     $account = $this->getMockBuilder(AccountInterface::class)->getMock();
-    $request = $this->getMockBuilder(RequestInterface::class)->getMock();
+    $request = $this->getMockBuilder(ServerRequestInterface::class)->getMock();
     $context = $this->getMockBuilder(ContextInterface::class)->getMock();
 
     $route = new Route('test', [], $request, $context);

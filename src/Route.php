@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Xylemical\Controller;
 
-use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Xylemical\Account\AccountInterface;
 
 /**
@@ -29,9 +29,9 @@ class Route implements RouteInterface {
   /**
    * The request.
    *
-   * @var \Psr\Http\Message\RequestInterface
+   * @var \Psr\Http\Message\ServerRequestInterface
    */
-  protected RequestInterface $request;
+  protected ServerRequestInterface $request;
 
   /**
    * The context.
@@ -54,12 +54,12 @@ class Route implements RouteInterface {
    *   The name.
    * @param array $arguments
    *   The arguments.
-   * @param \Psr\Http\Message\RequestInterface $request
+   * @param \Psr\Http\Message\ServerRequestInterface $request
    *   The request.
    * @param \Xylemical\Controller\ContextInterface $context
    *   The context.
    */
-  public function __construct(string $name, array $arguments, RequestInterface $request, ContextInterface $context) {
+  public function __construct(string $name, array $arguments, ServerRequestInterface $request, ContextInterface $context) {
     $this->name = $name;
     $this->arguments = $arguments;
     $this->request = $request;
@@ -83,14 +83,14 @@ class Route implements RouteInterface {
   /**
    * {@inheritdoc}
    */
-  public function getRequest(): RequestInterface {
+  public function getRequest(): ServerRequestInterface {
     return $this->request;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setRequest(RequestInterface $request): static {
+  public function setRequest(ServerRequestInterface $request): static {
     $this->request = $request;
     return $this;
   }
