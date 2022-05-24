@@ -95,27 +95,27 @@ class Uri implements UriInterface {
   /**
    * The regex to match a scheme from RFC3986.
    */
-  public const SCHEME_REGEX = '/' . self::URI_REGEX . '^(?&scheme)$/x';
+  public const SCHEME_REGEX = '/' . self::URI_REGEX . '^(?&scheme)$/xD';
 
   /**
    * The regex to match a host from RFC3986.
    */
-  public const HOST_REGEX = '/' . self::URI_REGEX . '^(?&host)$/x';
+  public const HOST_REGEX = '/' . self::URI_REGEX . '^(?&host)$/xD';
 
   /**
    * The regex to match a user from RFC3986.
    */
-  public const USER_REGEX = '/' . self::URI_REGEX . '^(?&reg_name)$/x';
+  public const USER_REGEX = '/' . self::URI_REGEX . '^(?&reg_name)$/xD';
 
   /**
    * The regex to match a password from RFC3986.
    */
-  public const PASS_REGEX = '/' . self::URI_REGEX . '^(?&reg_name)$/x';
+  public const PASS_REGEX = '/' . self::URI_REGEX . '^(?&reg_name)$/xD';
 
   /**
    * The regex to match a path from RFC3986.
    */
-  public const PATH_REGEX = '/' . self::URI_REGEX . '^(?&path)$/x';
+  public const PATH_REGEX = '/' . self::URI_REGEX . '^(?&path)$/xD';
 
   /**
    * The regex to match a fragment from RFC3986.
