@@ -14,7 +14,7 @@ class ContextFactory implements ContextFactoryInterface {
   /**
    * {@inheritdoc}
    */
-  public function getContext(ServerRequestInterface $request): ContextInterface {
+  public function getContext(ServerRequestInterface $request): ?ContextInterface {
     return new Context();
   }
 

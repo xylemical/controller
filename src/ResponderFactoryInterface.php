@@ -17,9 +17,9 @@ interface ResponderFactoryInterface {
    * @param \Xylemical\Controller\ResultInterface $result
    *   The result.
    *
-   * @return \Xylemical\Controller\ResponderInterface
+   * @return \Xylemical\Controller\ResponderInterface|null
    *   The responder.
    */
-  public function getResponder(RouteInterface $route, ResultInterface $result): ResponderInterface;
+  public function getResponder(RouteInterface $route, ResultInterface $result): ?ResponderInterface;
 
 }

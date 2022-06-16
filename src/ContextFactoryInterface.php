@@ -17,9 +17,9 @@ interface ContextFactoryInterface {
    * @param \Psr\Http\Message\ServerRequestInterface $request
    *   The request.
    *
-   * @return \Xylemical\Controller\ContextInterface
-   *   The context.
+   * @return \Xylemical\Controller\ContextInterface|null
+   *   The context or NULL.
    */
-  public function getContext(ServerRequestInterface $request): ContextInterface;
+  public function getContext(ServerRequestInterface $request): ?ContextInterface;
 
 }

@@ -15,9 +15,9 @@ interface RequesterFactoryInterface {
    * @param \Xylemical\Controller\RouteInterface $route
    *   The route.
    *
-   * @return \Xylemical\Controller\RequesterInterface
+   * @return \Xylemical\Controller\RequesterInterface|null
    *   The requester.
    */
-  public function getRequester(RouteInterface $route): RequesterInterface;
+  public function getRequester(RouteInterface $route): ?RequesterInterface;
 
 }

@@ -17,9 +17,9 @@ interface RouteFactoryInterface {
    * @param \Psr\Http\Message\ServerRequestInterface $request
    *   The request.
    *
-   * @return \Xylemical\Controller\RouteInterface
-   *   The route.
+   * @return \Xylemical\Controller\RouteInterface|null
+   *   The route or NULL.
    */
-  public function getRoute(ServerRequestInterface $request): RouteInterface;
+  public function getRoute(ServerRequestInterface $request): ?RouteInterface;
 
 }

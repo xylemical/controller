@@ -17,9 +17,9 @@ interface ProcessorFactoryInterface {
    * @param mixed $contents
    *   The contents.
    *
-   * @return \Xylemical\Controller\ProcessorInterface
-   *   The processor.
+   * @return \Xylemical\Controller\ProcessorInterface|null
+   *   The processor or NULL.
    */
-  public function getProcessor(RouteInterface $route, mixed $contents): ProcessorInterface;
+  public function getProcessor(RouteInterface $route, mixed $contents): ?ProcessorInterface;
 
 }

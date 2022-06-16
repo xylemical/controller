@@ -14,9 +14,9 @@ interface RequestReaderInterface {
   /**
    * Read a request.
    *
-   * @return \Psr\Http\Message\ServerRequestInterface
-   *   The request.
+   * @return \Psr\Http\Message\ServerRequestInterface|null
+   *   The request or NULL.
    */
-  public function getRequest(): ServerRequestInterface;
+  public function getRequest(): ?ServerRequestInterface;
 
 }
