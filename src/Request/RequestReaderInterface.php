@@ -12,14 +12,6 @@ use Psr\Http\Message\ServerRequestInterface;
 interface RequestReaderInterface {
 
   /**
-   * Check the request factory applies.
-   *
-   * @return bool
-   *   The result.
-   */
-  public function applies(): bool;
-
-  /**
    * Read a request.
    *
    * @return \Psr\Http\Message\ServerRequestInterface

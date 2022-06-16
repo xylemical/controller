@@ -14,13 +14,6 @@ class Authorization implements AuthorizationInterface {
   /**
    * {@inheritdoc}
    */
-  public function applies(RouteInterface $route): bool {
-    return FALSE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function authorize(RouteInterface $route): bool {
     return FALSE;
   }

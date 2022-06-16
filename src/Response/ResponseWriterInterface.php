@@ -12,25 +12,14 @@ use Psr\Http\Message\ResponseInterface;
 interface ResponseWriterInterface {
 
   /**
-   * Check the writer applies to the response.
-   *
-   * @param \Psr\Http\Message\ResponseInterface $response
-   *   The response.
-   *
-   * @return bool
-   *   The result.
-   */
-  public function applies(ResponseInterface $response): bool;
-
-  /**
    * Write a response out.
    *
    * @param \Psr\Http\Message\ResponseInterface $response
    *   The response.
    *
-   * @return int
-   *   The exit code.
+   * @return int|null
+   *   The exit code or NULL if not the appropriate writer.
    */
-  public function putResponse(ResponseInterface $response): int;
+  public function putResponse(ResponseInterface $response): ?int;
 
 }

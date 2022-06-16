@@ -15,13 +15,6 @@ class Authentication implements AuthenticationInterface {
   /**
    * {@inheritdoc}
    */
-  public function applies(RouteInterface $route): bool {
-    return FALSE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function authenticate(RouteInterface $route): ?AccountInterface {
     return NULL;
   }

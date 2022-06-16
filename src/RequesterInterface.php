@@ -10,26 +10,13 @@ namespace Xylemical\Controller;
 interface RequesterInterface {
 
   /**
-   * Check the request can handle the request.
-   *
-   * @param \Xylemical\Controller\RouteInterface $route
-   *   The route.
-   *
-   * @return bool
-   *   The result.
-   *
-   * @throws \Throwable
-   */
-  public function applies(RouteInterface $route): bool;
-
-  /**
    * Get the body from the request.
    *
    * @param \Xylemical\Controller\RouteInterface $route
    *   The route.
    *
-   * @return mixed
-   *   The body contents.
+   * @return mixed|null
+   *   The body contents or NULL.
    *
    * @throws \Xylemical\Controller\Exception\InvalidBodyException
    * @throws \Throwable

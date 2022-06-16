@@ -19,7 +19,6 @@ class AuthorizationTest extends TestCase {
     $route = $this->getMockBuilder(RouteInterface::class)->getMock();
 
     $authorization = new Authorization();
-    $this->assertFalse($authorization->applies($route));
     $this->assertFalse($authorization->authorize($route));
   }
 

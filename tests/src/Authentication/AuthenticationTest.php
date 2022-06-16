@@ -18,7 +18,6 @@ class AuthenticationTest extends TestCase {
   public function testSanity(): void {
     $route = $this->getMockBuilder(RouteInterface::class)->getMock();
     $authentication = new Authentication();
-    $this->assertFalse($authentication->applies($route));
     $this->assertNull($authentication->authenticate($route));
   }
 

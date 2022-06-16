@@ -13,17 +13,6 @@ use Xylemical\Controller\RouteInterface;
 interface AuthenticationInterface {
 
   /**
-   * Check the authentication service applies to the request.
-   *
-   * @param \Xylemical\Controller\RouteInterface $route
-   *   The route.
-   *
-   * @return bool
-   *   The result.
-   */
-  public function applies(RouteInterface $route): bool;
-
-  /**
    * Authenticate the route.
    *
    * @param \Xylemical\Controller\RouteInterface $route

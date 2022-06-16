@@ -104,8 +104,12 @@ final class Controller {
       $this->doAuthentication($route);
       $this->doRequest($route);
       $this->doAuthorization($route);
-      $body = $this->doBody($route);
-      $result = $this->doProcess($route, $body);
+      if (is_null($body = $this->doBody($route))) {
+        throw new \Exception("No available requester.");
+      }
+      if (is_null($result = $this->doProcess($route, $body))) {
+        throw new \Exception("No available processor.");
+      }
     }
     catch (AccessException $e) {
       $result = Result::access($e->getMessage());
@@ -131,7 +135,7 @@ final class Controller {
    */
   protected function doAuthentication(RouteInterface $route): void {
     $authentication = $this->authenticationFactory?->getAuthentication($route);
-    if ($authentication && $authentication->applies($route)) {
+    if ($authentication) {
       $route->setAccount($authentication->authenticate($route));
     }
   }
@@ -168,7 +172,7 @@ final class Controller {
    */
   protected function doAuthorization(RouteInterface $route): void {
     $authorization = $this->authorizationFactory?->getAuthorization($route);
-    if ($authorization && $authorization->applies($route) && !$authorization->authorize($route)) {
+    if ($authorization && !$authorization->authorize($route)) {
       throw new AccessException();
     }
   }
@@ -179,7 +183,7 @@ final class Controller {
    * @param \Xylemical\Controller\RouteInterface $route
    *   The route.
    *
-   * @return mixed
+   * @return mixed|null
    *   The body.
    *
    * @throws \Throwable
@@ -187,9 +191,6 @@ final class Controller {
    */
   protected function doBody(RouteInterface $route): mixed {
     $requester = $this->requesterFactory->getRequester($route);
-    if (!$requester->applies($route)) {
-      throw new \Exception('No available requester.');
-    }
     return $requester->getBody($route);
   }
 
@@ -201,8 +202,8 @@ final class Controller {
    * @param mixed $body
    *   The body.
    *
-   * @return \Xylemical\Controller\ResultInterface
-   *   The result.
+   * @return \Xylemical\Controller\ResultInterface|null
+   *   The result or NULL.
    *
    * @throws \Throwable
    * @throws \Xylemical\Controller\Exception\AccessException
@@ -210,12 +211,8 @@ final class Controller {
    * @throws \Xylemical\Controller\Exception\ErrorException
    * @throws \Xylemical\Controller\Exception\UnavailableException
    */
-  protected function doProcess(RouteInterface $route, mixed $body): ResultInterface {
+  protected function doProcess(RouteInterface $route, mixed $body): ?ResultInterface {
     $processor = $this->processorFactory->getProcessor($route, $body);
-    if (!$processor->applies($route, $body)) {
-      throw new \Exception('No available processor.');
-    }
-
     return $processor->getResult($route, $body);
   }
 
@@ -233,11 +230,11 @@ final class Controller {
   protected function doResponse(RouteInterface $route, ResultInterface $result): ResponseInterface {
     try {
       $responder = $this->responderFactory->getResponder($route, $result);
-      if (!$responder->applies($route, $result)) {
-        throw new \Exception('No available responder.');
-      }
 
       $response = $responder->getResponse($route, $result);
+      if (!$response) {
+        throw new \Exception("No available responder.");
+      }
 
       ksort($this->middleware);
       foreach ($this->middleware as $middlewares) {

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Xylemical\Controller;
 
-use Xylemical\Controller\Exception\UnavailableException;
-
 /**
  * Provides a generic processor.
  */
@@ -46,25 +44,13 @@ class Processor implements ProcessorInterface {
   /**
    * {@inheritdoc}
    */
-  public function applies(RouteInterface $route, mixed $contents): bool {
+  public function getResult(RouteInterface $route, mixed $contents): ?ResultInterface {
     foreach ($this->processors as $processor) {
-      if ($processor->applies($route, $contents)) {
-        return TRUE;
+      if ($result = $processor->getResult($route, $contents)) {
+        return $result;
       }
     }
-    return FALSE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getResult(RouteInterface $route, mixed $contents): ResultInterface {
-    foreach ($this->processors as $processor) {
-      if ($processor->applies($route, $contents)) {
-        return $processor->getResult($route, $contents);
-      }
-    }
-    throw new UnavailableException('Unable to match a valid processor.');
+    return NULL;
   }
 
 }

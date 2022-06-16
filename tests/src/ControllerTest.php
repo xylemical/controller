@@ -5,8 +5,8 @@ namespace Xylemical\Controller;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Xylemical\Account\AccountInterface;
 use Xylemical\Controller\Authentication\AuthenticationFactoryInterface;
 use Xylemical\Controller\Authentication\AuthenticationInterface;
@@ -37,15 +37,10 @@ class ControllerTest extends TestCase {
    */
   protected function getMockRequesterFactory(RouteInterface $route, mixed $returns): RequesterFactoryInterface {
     $requester = $this->prophesize(RequesterInterface::class);
-    if (is_null($returns)) {
-      $requester->applies($route)->willReturn(FALSE);
-    }
-    elseif ($returns instanceof \Throwable) {
-      $requester->applies($route)->willReturn(TRUE);
+    if ($returns instanceof \Throwable) {
       $requester->getBody($route)->willThrow($returns);
     }
     else {
-      $requester->applies($route)->willReturn(TRUE);
       $requester->getBody($route)->willReturn($returns);
     }
     $factory = $this->prophesize(RequesterFactoryInterface::class);
@@ -66,15 +61,10 @@ class ControllerTest extends TestCase {
    */
   protected function getMockProcessorFactory(RouteInterface $route, mixed $returns): ProcessorFactoryInterface {
     $processor = $this->prophesize(ProcessorInterface::class);
-    if (is_null($returns)) {
-      $processor->applies($route, Argument::any())->willReturn(FALSE);
-    }
-    elseif ($returns instanceof \Throwable) {
-      $processor->applies($route, Argument::any())->willReturn(TRUE);
+    if ($returns instanceof \Throwable) {
       $processor->getResult($route, Argument::any())->willThrow($returns);
     }
     else {
-      $processor->applies($route, Argument::any())->willReturn(TRUE);
       $processor->getResult($route, Argument::any())->willReturn($returns);
     }
     $factory = $this->prophesize(ProcessorFactoryInterface::class);
@@ -99,7 +89,6 @@ class ControllerTest extends TestCase {
   protected function getMockResponderFactory(RouteInterface $route, mixed $result, mixed $returns): ResponderFactoryInterface {
     $responder = $this->prophesize(ResponderInterface::class);
     if ($returns === TRUE) {
-      $responder->applies($route, Argument::any())->willReturn(TRUE);
       $responder->getResponse($route, Argument::any())->will(function ($args) {
         /** @var \Xylemical\Controller\ResultInterface $result */
         $result = $args[1];
@@ -112,15 +101,10 @@ class ControllerTest extends TestCase {
         return $response;
       });
     }
-    elseif (is_null($returns)) {
-      $responder->applies($route, $result)->willReturn(FALSE);
-    }
     elseif ($returns instanceof \Throwable) {
-      $responder->applies($route, $result)->willReturn(TRUE);
       $responder->getResponse($route, Argument::any())->willThrow($returns);
     }
     else {
-      $responder->applies($route, $result)->willReturn(TRUE);
       $responder->getResponse($route, $result)->willReturn($returns);
     }
     $factory = $this->prophesize(ResponderFactoryInterface::class);
@@ -199,18 +183,16 @@ class ControllerTest extends TestCase {
    * @param \Xylemical\Account\AccountInterface|bool|null|\Throwable $returns
    *   The returns.
    *
-   * @return \Xylemical\Controller\Authentication\AuthenticationFactoryInterface
+   * @return \Xylemical\Controller\Authentication\AuthenticationFactoryInterface|null
    *   The factory.
    */
-  protected function getMockAuthenticationFactory(RouteInterface $route, mixed $returns): AuthenticationFactoryInterface {
+  protected function getMockAuthenticationFactory(RouteInterface $route, mixed $returns): ?AuthenticationFactoryInterface {
+    if (is_null($returns)) {
+      return NULL;
+    }
+
     $authentication = $this->prophesize(AuthenticationInterface::class);
-    if ($returns === FALSE) {
-      $authentication->applies($route)->willReturn(FALSE);
-    }
-    else {
-      $authentication->applies($route)->willReturn(TRUE);
-      $authentication->authenticate($route)->willReturn($returns);
-    }
+    $authentication->authenticate($route)->willReturn($returns ?: NULL);
     $factory = $this->prophesize(AuthenticationFactoryInterface::class);
     $factory->getAuthentication($route)
       ->willReturn($authentication->reveal());
@@ -225,19 +207,16 @@ class ControllerTest extends TestCase {
    * @param \Xylemical\Account\AccountInterface|null|\Throwable $returns
    *   The returns.
    *
-   * @return \Xylemical\Controller\Authorization\AuthorizationFactoryInterface
+   * @return \Xylemical\Controller\Authorization\AuthorizationFactoryInterface|null
    *   The factory.
    */
-  protected function getMockAuthorizationFactory(RouteInterface $route, mixed $returns): AuthorizationFactoryInterface {
-    $authorization = $this->prophesize(AuthorizationInterface::class);
+  protected function getMockAuthorizationFactory(RouteInterface $route, mixed $returns): ?AuthorizationFactoryInterface {
     if (is_null($returns)) {
-      $authorization->applies($route)->willReturn(FALSE);
-    }
-    else {
-      $authorization->applies($route)->willReturn(TRUE);
-      $authorization->authorize($route)->willReturn($returns);
+      return NULL;
     }
 
+    $authorization = $this->prophesize(AuthorizationInterface::class);
+    $authorization->authorize($route)->willReturn($returns);
     $factory = $this->prophesize(AuthorizationFactoryInterface::class);
     $factory->getAuthorization($route)
       ->willReturn($authorization->reveal());
@@ -403,7 +382,10 @@ class ControllerTest extends TestCase {
     $processorFactory = $this->getMockProcessorFactory($route, $result);
     $responderFactory = $this->getMockResponderFactory($route, $result, TRUE);
     $middlewareFactory = $this->getMockMiddlewareFactory($route, []);
-    $authenticationFactory = $this->getMockAuthenticationFactory($route, match($authorization) {default => NULL, TRUE => $account, FALSE => FALSE
+    $authenticationFactory = $this->getMockAuthenticationFactory($route, match ($authorization) {
+      default => NULL,
+      TRUE => $account,
+      FALSE => FALSE
     });
     $authorizationFactory = $this->getMockAuthorizationFactory($route, $authorization);
 
